@@ -1,18 +1,50 @@
 import sys
 import secrets
+import sqlite3
 from flask import Flask, render_template
-
 from bs4 import BeautifulSoup
-
 import requests
-
 import spotipy
 import spotipy.util as util		
 
+#DROP. THE BASS
+
+DBNAME = "mg.sqlite"
+
+def create_mg_db():
+	try:
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+	except Exception as e:
+		print(e)
+
+	statement = '''
+		DROP TABLE IF EXISTS 'Artists';
+	'''
+	cur.execute(statement)
+
+	statement = '''
+		DROP TABLE IF EXISTS 'Articles';
+	'''
+
+	cur.execute(statement)
+	conn.commit()
+
+def populate_mg_db():
+
+	#Artists
+	statement = '''
+	CREATE TABLE 'Artists' (
+		'Id' INTEGER PRIMARY KEY AUTOCREMENT,
+		'Spotify_Id' TEXT NOT NULL,
+		'Name' TEXT NOT NULL,
+		'Genre' TEXT NOT NULL
 
 
 
+	)
 
+	'''
 
 
 
@@ -54,9 +86,9 @@ def search_artists(artist):
 	output = []
 	for item in results['artists']['items']:
 		if len(item['genres']) < 1:
-			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
 		else:
-			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
 		output.append(artist_data)
 	# print(output)
 	return output
@@ -74,9 +106,9 @@ def get_others_in_genre(artist):
 
 	for item in results1['artists']:
 		if len(item['genres']) < 1:
-			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
 		else:
-			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
 		output1.append(artist_data)
 
 
@@ -85,9 +117,9 @@ def get_others_in_genre(artist):
 
 	for item in results2['artists']:
 		if len(item['genres']) < 1:
-			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
 		else:
-			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
 		output2.append(artist_data)
 
 	print(output2)
