@@ -28,9 +28,6 @@ redirect_uri = "https://accounts.spotify.com/authorize" #this will become the UR
 S_CLIENT_ID = secrets.SPOTIFY_CLIENT_ID
 S_CLIENT_SECRET = secrets.SPOTIFY_CLIENT_SECRET
 
-print(S_CLIENT_ID)
-print(S_CLIENT_SECRET)
-
 token = util.prompt_for_user_token(username, scope, client_id=S_CLIENT_ID,client_secret=S_CLIENT_SECRET,redirect_uri=redirect_uri)
 
 if token:
@@ -43,29 +40,30 @@ if token:
 else:
     print("Can't get token for", username)
 
-
-
-
-
-
 #SPOTIFY REQESTS ARTIST DATA
 # - Uses Spotify Web API Search Endpoint: https://beta.developer.spotify.com/documentation/web-api/reference/search/search/ 
 #### - For later, it's in the cache, pull it from the database
 #### - Otherwise, write it to the cache and database
 
 
-def get_artist_info(artist):
-	# base_url = "https://api.spotify.com/v1/search/"
-	# params_dict = {
-	# 	'q': artist,
-	# 	'type': 'artist'
-	# }
+def search_artists(artist):
 	results = SP.search(artist,type='artist')
-	print(results)
+
+	output = []
+	for item in results['artists']['items']:
+		if len(item['genres']) < 1:
+			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+		else:
+			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+		output.append(artist_data)
+	print(output)
+	return output
 
 
+# def get_genre
 
-get_artist_info('Kendrick Lamar')
+
+get_artist_info('Kendrick')
 
 
 # if __name__ == '__main__':
