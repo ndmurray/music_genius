@@ -9,11 +9,11 @@ import requests
 import spotipy
 import spotipy.util as util		
 
-# app = Flask(__name__)
 
-# @app.route('/')
-# def home():
-# 	return '<h1>Welcome!</h1>'
+
+
+
+
 
 
 #SPOTIFY AUTHENTICATION
@@ -40,12 +40,14 @@ if token:
 else:
     print("Can't get token for", username)
 
-#SPOTIFY REQESTS ARTIST DATA
+#SPOTIFY REQUESTS - NEEDS DB Population
+
 # - Uses Spotify Web API Search Endpoint: https://beta.developer.spotify.com/documentation/web-api/reference/search/search/ 
 #### - For later, it's in the cache, pull it from the database
 #### - Otherwise, write it to the cache and database
 
 
+#Search based on artist name
 def search_artists(artist):
 	results = SP.search(artist,type='artist')
 
@@ -56,15 +58,79 @@ def search_artists(artist):
 		else:
 			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
 		output.append(artist_data)
+	# print(output)
+	return output
+
+#Playlist search based on genre from first result in artist search
+## - later we'll change this to let the user pick the artist to show results based on 
+## - Need to work out how to sort response by popularity, otherwise we might have to toss this
+
+def get_others_in_genre(artist):
+	artist = search_artists(artist)[0][3] #id from first artist for now
+	results1 = SP.artist_related_artists(artist)
+	output1 = []
+
+	print(results1)
+
+	for item in results1['artists']:
+		if len(item['genres']) < 1:
+			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+		else:
+			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+		output1.append(artist_data)
+
+
+	results2 = SP.artist_related_artists(artist)
+	output2 = []
+
+	for item in results2['artists']:
+		if len(item['genres']) < 1:
+			artist_data = (item['name'],"no genre",item['popularity'],item['id'])
+		else:
+			artist_data = (item['name'],item['genres'][0],item['popularity'],item['id'])
+		output2.append(artist_data)
+
+	print(output2)
+
+	output = output1
+
+	for item in output2:
+		output.append(item)
+
+
+	output1.append(output2)
 	print(output)
 	return output
 
 
-# def get_genre
+get_others_in_genre('Kendrick')
 
 
-get_artist_info('Kendrick')
+#WIKIPEDIA - SCRAPE IT - NEEDS CACHE
+
+def get_wiki_page(artist):
+	base_url = "https://en.wikipedia.org/wiki/"
+	artist_clean = artist.replace(" ","_")
+	page_url = base_url + artist_clean
+
+	page_text = requests.get(page_url).text
+	print(pull_wiki_overview(page_text))
+
+def pull_wiki_overview(page_text):
+	overview = ""
+	soup = BeautifulSoup(page_text, 'html.parser')
+	container = soup.find('div',attrs={'class':'mw-parser-output'})
+	paras = container.find_all('p')
+
+	for p in paras[:2]: #First 2 paragraphs only
+		overview += "\n" + p.text + "\n"
+
+	return overview
 
 
-# if __name__ == '__main__':
-# 	app.run(debug=True)
+#get_wiki_page("Michael Jackson")
+
+
+
+
+
