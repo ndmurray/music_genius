@@ -3,11 +3,12 @@ import secrets
 import sqlite3
 from flask import Flask, render_template
 from bs4 import BeautifulSoup
+import json
 import requests
 import spotipy
 import spotipy.util as util		
 
-#DROP. THE BASS
+#SET UP THE DATABASE
 
 DBNAME = "mg.sqlite"
 
@@ -30,22 +31,49 @@ def create_mg_db():
 	cur.execute(statement)
 	conn.commit()
 
-def populate_mg_db():
+def stand_up_db_tables():
+	conn = sqlite3.connect(DBNAME)
+	cur = conn.cursor()
 
 	#Artists
 	statement = '''
 	CREATE TABLE 'Artists' (
-		'Id' INTEGER PRIMARY KEY AUTOCREMENT,
+		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
 		'Spotify_Id' TEXT NOT NULL,
 		'Name' TEXT NOT NULL,
-		'Genre' TEXT NOT NULL
-
-
+		'Genre' TEXT NOT NULL,
+		'Popularity' INTEGER NOT NULL,
+		'Followers' INTEGER NOT NULL
 
 	)
 
 	'''
 
+	cur.execute(statement)
+
+	#Insert Articles table creation code here
+
+	conn.commit()
+	conn.close()
+
+def update_artists_table(output): #output is a list of tuples
+	conn = sqlite3.connect(DBNAME)
+	cur = conn.cursor()
+	data = output
+
+	for row in data:
+		cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?)",row)
+
+	conn.commit()
+	conn.close()
+
+create_mg_db()
+stand_up_db_tables()
+
+
+#CACHING SYSTEM
+
+WIKI_CACHE_FILE = "wiki_cache.json"
 
 
 #SPOTIFY AUTHENTICATION
@@ -86,9 +114,9 @@ def search_artists(artist):
 	output = []
 	for item in results['artists']['items']:
 		if len(item['genres']) < 1:
-			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
+			artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'])
 		else:
-			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
+			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'])
 		output.append(artist_data)
 	# print(output)
 	return output
@@ -98,44 +126,25 @@ def search_artists(artist):
 ## - Need to work out how to sort response by popularity, otherwise we might have to toss this
 
 def get_others_in_genre(artist):
-	artist = search_artists(artist)[0][3] #id from first artist for now
-	results1 = SP.artist_related_artists(artist)
-	output1 = []
+	artist = search_artists(artist)[0][0] #id from first artist for now
+	results = SP.artist_related_artists(artist)
+	output = []
 
-	print(results1)
-
-	for item in results1['artists']:
+	for item in results['artists']:
 		if len(item['genres']) < 1:
-			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
+			artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'])
 		else:
-			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
-		output1.append(artist_data)
+			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'])
+		output.append(artist_data)
 
 
-	results2 = SP.artist_related_artists(artist)
-	output2 = []
-
-	for item in results2['artists']:
-		if len(item['genres']) < 1:
-			artist_data = (item['id'],item['name'],"no genre",item['popularity'])
-		else:
-			artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'])
-		output2.append(artist_data)
-
-	print(output2)
-
-	output = output1
-
-	for item in output2:
-		output.append(item)
-
-
-	output1.append(output2)
 	print(output)
 	return output
 
 
-get_others_in_genre('Kendrick')
+data = get_others_in_genre('James Brown')
+
+update_artists_table(data)
 
 
 #WIKIPEDIA - SCRAPE IT - NEEDS CACHE
