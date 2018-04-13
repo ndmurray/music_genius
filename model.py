@@ -135,7 +135,7 @@ else:
 
 
 #Search based on artist name
-def search_artists(artist):
+def search_artists(artist="Danny Brown"):
 	base_url = "https://api.spotify.com/v1"
 	artist_clean = artist.replace(" ","_")
 
@@ -208,12 +208,14 @@ def get_others_in_genre(artist):
 		sp_cache_file.close()
 		print("Fresh related artist data for " + artist + " written to cache.")
 
+		#Update the database
+		update_artists_table(output)
+
 		return output
 
 
-data = get_others_in_genre('Earl Sweatshirt')
+#get_others_in_genre('Earl Sweatshirt')
 
-update_artists_table(data)
 
 
 #WIKIPEDIA - SCRAPE IT
@@ -263,7 +265,7 @@ def get_wiki_page(artist):
 
 
 
-get_wiki_page("Earl Sweatshirt")
+#get_wiki_page("Earl Sweatshirt")
 
 
 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <title>MusicGenius</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+    </head>
+
+    <body>
+        <div class="container">
+            <form class="ml-5" action="/" method="post">
+                            
+                <input type="text" class="form-control col-4 mb-4" id="validationCustom03" placeholder="Enter an artist name" name="artist-entry" required>
+                                                      
+                <button class="btn btn-default col-2" method="POST" type="submit">Go!</button>
+                              <!--   <input type="submit"> -->
+            </form>
+
+            <div class="container">
+                <h1 class="text-center">{{artist}}</h1>
+
+                <ul>
+                {% for item in related %}
+                    <li>{{item}}</li>
+                {% endfor %}
+                </ul>
+            </div>    
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    </body>
+</html>
+
