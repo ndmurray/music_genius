@@ -12,7 +12,6 @@
 
     <body>
         <div class="container">
-            <h1>Music Genius!</h1>
             <form class="ml-5" action="/" method="post">
                             
                 <input type="text" class="form-control col-4 mb-4" id="validationCustom03" placeholder="Enter an artist name" name="artist-entry" required>
@@ -22,19 +21,7 @@
             </form>
 
             <div class="container">
-                <h2 class="text-left">{{artist}}</h2>
-                <h3>Overview</h3>
-                <p>{{overview}}</p>
-                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                    <h3>Related Arists</h3>
-                    <ul>
-                    {% for item in related %}
-                        <li>{{item}}</li>
-                    {% endfor %}
-                    </ul>
-                </div>
-
-                    
+                <img src="static/marko.jpg" />
             </div>    
         </div>
 
