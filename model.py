@@ -150,11 +150,14 @@ def search_artists(artist="Danny Brown"):
 		#Pull new data and format it
 		print("Getting fresh data from Spotify for " + artist)
 		results = SP.search(artist,type='artist')
-		print(results)
 		output = []
 		for item in results['artists']['items']:
-			if len(item['genres']) < 1:
+			if len(item['genres']) < 1 and len(item['images']) < 1:
+				artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image")
+			elif len(item['genres']) < 1:
 				artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
+			elif len(item['images']) < 1:
+				artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image")
 			else:
 				artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
 			output.append(artist_data)
@@ -188,7 +191,9 @@ def get_others_in_genre(artist):
 		return SP_CACHE_DICT[unique_ident]
 	else:
 		print("Getting fresh related artist data from Spotify for " + artist)
-		artist = search_artists(artist)[0][0] #id from first artist for now
+		search_results = search_artists(artist)
+		artist = search_results[0][0] #id from first artist for now
+		artist_display =  search_results[0][1]
 		results = SP.artist_related_artists(artist)
 		output = []
 
@@ -200,13 +205,13 @@ def get_others_in_genre(artist):
 			output.append(artist_data)
 
 		#Write new spotify data to the cache
-		print("Writing related Spotify data for " + artist + " to the cache.")
+		print("Writing related Spotify data for " + artist_display + " to the cache.")
 		SP_CACHE_DICT[unique_ident] = output
 		dumped_sp_data = json.dumps(SP_CACHE_DICT)
 		sp_cache_file = open(SP_CACHE_FILE_NAME, 'w')
 		sp_cache_file.write(dumped_sp_data)
 		sp_cache_file.close()
-		print("Fresh related artist data for " + artist + " written to cache.")
+		print("Fresh related artist data for " + artist_display + " written to cache.")
 
 		#Update the database
 		update_artists_table(output)
@@ -214,8 +219,8 @@ def get_others_in_genre(artist):
 		return output
 
 
-#get_others_in_genre('Earl Sweatshirt')
-
+get_others_in_genre('Amy Winehouse')
+#search_artists('Amy Winehouse')
 
 
 #WIKIPEDIA - SCRAPE IT
@@ -265,7 +270,7 @@ def get_wiki_page(artist):
 
 
 
-#get_wiki_page("Earl Sweatshirt")
+get_wiki_page("Amy Winehouse")
 
 
 
