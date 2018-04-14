@@ -7,6 +7,9 @@ import requests
 import spotipy
 import spotipy.util as util		
 
+#ISSUES
+##Clear the cache before you run this thing for real, so that Danny Brown's data is in the db
+
 #SET UP THE DATABASE
 
 DBNAME = "mg.sqlite"
@@ -20,6 +23,11 @@ def create_mg_db():
 
 	statement = '''
 		DROP TABLE IF EXISTS 'Artists';
+	'''
+	cur.execute(statement)
+
+	statement = '''
+		DROP TABLE IF EXISTS 'Tracks';
 	'''
 	cur.execute(statement)
 
@@ -51,6 +59,23 @@ def stand_up_db_tables():
 
 	cur.execute(statement)
 
+	#Tracks
+	statement = '''
+	CREATE TABLE 'Tracks' (
+		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+		'Spotify_Id' TEXT NOT NULL,
+		'Name' TEXT NOT NULL,
+		'Artist' TEXT NOT NULL,
+		'Popularity' INTEGER NOT NULL,
+		'Album' TEXT NOT NULL,
+		'Release Date' TEXT NOT NULL
+
+	)
+
+	'''
+
+	cur.execute(statement)
+
 	#Insert Articles table creation code here
 
 	conn.commit()
@@ -67,6 +92,17 @@ def update_artists_table(output): #output is a list of tuples
 	conn.commit()
 	conn.close()
 
+def update_tracks_table(output):
+	conn = sqlite3.connect(DBNAME)
+	cur = conn.cursor()
+	data = output
+
+	for row in data:
+		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?)",row)
+
+	conn.commit()
+	conn.close()
+
 create_mg_db()
 stand_up_db_tables()
 
@@ -76,6 +112,7 @@ stand_up_db_tables()
 ##file
 WIKI_CACHE_FILE_NAME = "wiki_cache.json"
 SP_CACHE_FILE_NAME = "spotify_cache.json"
+G_CACHE_FILE_NAME = "google_cache.json"
 
 
 ##Load cache files to dictionary
@@ -94,6 +131,15 @@ try:
 	sp_cache_file.close()
 except:
 	SP_CACHE_DICT = {}
+
+try:
+	g_cache_file = open(G_CACHE_FILE_NAME, 'r')
+	g_cache_str = g_cache_file.read()
+	G_CACHE_DICT = json.loads(g_cache_str)
+	g_cache_file.close()
+except:
+	G_CACHE_DICT = {}
+
 
 
 ##Unique Ids
@@ -218,10 +264,49 @@ def get_others_in_genre(artist):
 
 		return output
 
+def get_top_tracks(artist):
+	base_url = "https://api.spotify.com/v1"
+	artist_clean = artist.replace(" ","_"+"_top-tracks")
 
-get_others_in_genre('Amy Winehouse')
+	#Decide whether data comes from web or cache
+	unique_ident = unique_id(base_url,artist_clean)
+	
+	if unique_ident in SP_CACHE_DICT:
+		#Get data from cache
+		print("Getting " + artist + "'s top tracks.")
+		return SP_CACHE_DICT[unique_ident]
+
+	else:
+		print("Getting fresh related artist data from Spotify for " + artist)
+		search_results = search_artists(artist)
+		artist = search_results[0][0] #id from first artist for now
+		artist_display =  search_results[0][1]
+		results = SP.artist_top_tracks(artist, country="US")
+		output = []
+
+		for item in results['tracks']:
+			track_data = (item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
+			output.append(track_data)
+
+
+
+		# #Write new spotify data to the cache
+		print("Writing top tracks data for " + artist_display + " to the cache.")
+		SP_CACHE_DICT[unique_ident] = output
+		dumped_sp_data = json.dumps(SP_CACHE_DICT)
+		sp_cache_file = open(SP_CACHE_FILE_NAME, 'w')
+		sp_cache_file.write(dumped_sp_data)
+		sp_cache_file.close()
+		print("Fresh top track data for " + artist_display + " written to cache.")
+
+		#Update the database
+		update_tracks_table(output)
+
+		return output
+
+#get_others_in_genre('Amy Winehouse')
 #search_artists('Amy Winehouse')
-
+get_top_tracks('Janis Joplin')
 
 #WIKIPEDIA - SCRAPE IT
 
@@ -270,7 +355,7 @@ def get_wiki_page(artist):
 
 
 
-get_wiki_page("Amy Winehouse")
+get_wiki_page("Janis Joplin")
 
 
 
