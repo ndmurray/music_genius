@@ -15,9 +15,13 @@ def related_display(artist):
 		related_dict[item.name] = item.artist_url
 	return related_dict
 
-
 #Tracks
-
+def track_display(artist):
+	track_data = model.get_top_tracks(artist)
+	track_dict = {}
+	for item in track_data:
+		track_dict[item.name] = item
+	return track_dict
 
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
@@ -29,18 +33,15 @@ def index():
 
 		overview = model.get_wiki_page(artist)
 		related = related_display(artist)
-		
-		#top_track_names
-
-		
-		#top_tracks = 
+		tracks = track_display(artist)
+			
 	else:
 		artist = "Danny Brown"
 		overview = model.get_wiki_page(artist)
 		related = related_display(artist)
-		#top_tracks = model.get_top_tracks(artist)
+		tracks = track_display(artist)
 
-	return render_template('index.html',artist=artist,related=related,overview=overview)
+	return render_template('index.html',artist=artist,related=related,overview=overview,tracks=tracks)
 	# except:
 		# return render_template('error.html')
 

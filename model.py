@@ -69,7 +69,8 @@ def stand_up_db_tables():
 		'Artist' TEXT NOT NULL,
 		'Popularity' INTEGER NOT NULL,
 		'Album' TEXT NOT NULL,
-		'Release Date' TEXT NOT NULL
+		'Release Date' TEXT NOT NULL,
+		'URL' TEXT NOT NULL
 
 	)
 
@@ -99,7 +100,7 @@ def update_tracks_table(output):
 	data = output
 
 	for row in data:
-		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?)",row.db_row())
+		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",row.db_row())
 
 	conn.commit()
 	conn.close()
@@ -168,16 +169,17 @@ class Artist():
 		return self.name + ", " + self.genre + ", popularity = " + str(self.popularity)
 
 class Track():
-	def __init__(self="None.", spotify_id="None.", name="None.", artist="None.", popularity="None.", album="None.", release_date=""):
+	def __init__(self="None.", spotify_id="None.", name="None.", artist="None.", popularity="None.", album="None.", release_date="",track_url="None."):
 		self.spotify_id = spotify_id	
 		self.name = name
 		self.artist = artist
 		self.popularity = popularity
 		self.album = album
 		self.release_date = release_date
+		self.track_url = track_url
 
 	def db_row(self):
-		return (self.spotify_id, self.name, self.artist, self.popularity, self.album, self.release_date)
+		return (self.spotify_id, self.name, self.artist, self.popularity, self.album, self.release_date, self.track_url)
 
 	def __str__(self):
 		return '"' + self.name + '" by ' + self.artist + '. Off of "' + self.album + ", " +self.release_date
@@ -342,7 +344,7 @@ def get_top_tracks(artist):
 		results = SP_CACHE_DICT[unique_ident]
 		output = []
 		for item in results['tracks']:
-			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
+			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
 			output.append(track_data)
 
 		return output
@@ -356,7 +358,7 @@ def get_top_tracks(artist):
 		output = []
 
 		for item in results['tracks']:
-			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
+			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
 			output.append(track_data)
 
 
@@ -378,9 +380,9 @@ def get_top_tracks(artist):
 
 		return output
 
-get_others_in_genre('Charlie Parker')
-search_artists('Charlie Parker')
-get_top_tracks('Charlie Parker')
+get_others_in_genre('Coleman Hawkins')
+search_artists('Coleman Hawkins')
+get_top_tracks('Coleman Hawkins')
 
 
 #GOOGLE NEWS 
@@ -436,7 +438,7 @@ def get_wiki_page(artist):
 
 
 
-get_wiki_page("Charlie Parker")
+get_wiki_page("Coleman Hawkins")
 
 
 
