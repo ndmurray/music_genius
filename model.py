@@ -34,8 +34,8 @@ def create_mg_db():
 	statement = '''
 		DROP TABLE IF EXISTS 'Articles';
 	'''
-
 	cur.execute(statement)
+
 	conn.commit()
 
 def stand_up_db_tables():
@@ -78,7 +78,21 @@ def stand_up_db_tables():
 
 	cur.execute(statement)
 
-	#Insert Articles table creation code here
+	#Articles
+	statement = '''
+	CREATE TABLE 'Articles' (
+		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+		'Title' TEXT NOT NULL,
+		'Source' TEXT NOT NULL,
+		'Description' TEXT NOT NULL,
+		'PublishedAt' TEXT NOT NULL,
+		'URL' TEXT NOT NULL
+
+	)
+
+	'''
+
+	cur.execute(statement)
 
 	conn.commit()
 	conn.close()
@@ -104,6 +118,18 @@ def update_tracks_table(output):
 
 	conn.commit()
 	conn.close()
+
+def update_articles_table(output):
+	conn = sqlite3.connect(DBNAME)
+	cur = conn.cursor()
+	data = output
+
+	for row in data:
+		cur.execute("INSERT INTO Articles VALUES(NULL, ?, ?, ?, ?, ?)",row.db_row())
+
+	conn.commit()
+	conn.close()
+
 
 create_mg_db()
 stand_up_db_tables()
@@ -169,7 +195,7 @@ class Artist():
 		return self.name + ", " + self.genre + ", popularity = " + str(self.popularity)
 
 class Track():
-	def __init__(self="None.", spotify_id="None.", name="None.", artist="None.", popularity="None.", album="None.", release_date="",track_url="None."):
+	def __init__(self, spotify_id="None.", name="None.", artist="None.", popularity="None.", album="None.", release_date="",track_url="None."):
 		self.spotify_id = spotify_id	
 		self.name = name
 		self.artist = artist
@@ -184,9 +210,21 @@ class Track():
 	def __str__(self):
 		return '"' + self.name + '" by ' + self.artist + '. Off of "' + self.album + ", " +self.release_date
 
-class Headline():
+class Article():
+	def __init__(self, title="No title", source="No source", description="No description",published_at="none",url="none"):
+		self.title = title
+		self.source = source
+		self.description = description
+		self.published_at = published_at
+		self.url = url
 
-	pass
+
+	def db_row(self):
+		return (self.title, self.source, self.description, self.published_at, self.url)
+
+	
+	def __str__(self):
+		return self.title + " - " + self.source + ", " + self.published_at	
 
 
 
@@ -380,16 +418,66 @@ def get_top_tracks(artist):
 
 		return output
 
-get_others_in_genre('Coleman Hawkins')
-search_artists('Coleman Hawkins')
-get_top_tracks('Coleman Hawkins')
+#get_others_in_genre('Coleman Hawkins')
+#search_artists('Coleman Hawkins')
+#get_top_tracks('Coleman Hawkins')
 
 
 #GOOGLE NEWS 
 
+GOOGLE_API_KEY = secrets.GOOGLE_API_KEY
 
 def get_headlines(artist):
-	pass
+	base_url = "https://newsapi.org/v2/everything"
+	artist_clean = artist.replace(" ","_")
+
+
+	unique_ident = unique_id(base_url, artist_clean)
+
+	if unique_ident	in G_CACHE_DICT:
+		#Get data from cache
+		print("Getting headline data for " + artist)
+		results = G_CACHE_DICT[unique_ident]
+
+		output = []
+		for item in results['articles']:
+			article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
+			output.append(article_data)
+		return output
+
+	else:
+		print("Getting fresh headline data for " + artist)
+		search_results = search_artists(artist) #first artist from spotify search results
+		artist_display = search_results[0].name
+		params_dict = {
+			'apiKey': GOOGLE_API_KEY,
+			'q': artist
+		}
+
+		results = json.loads(requests.get(base_url, params_dict).text)
+		print(type(results))
+
+		output = []
+		for item in results['articles']:
+			article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
+			output.append(article_data)
+
+
+		#Write new data to cache
+		print("Writing headline data for " + artist + "to cache.")
+		G_CACHE_DICT[unique_ident] = results
+		dumped_g_data = json.dumps(G_CACHE_DICT)
+		g_cache_file = open(G_CACHE_FILE_NAME, 'w')
+		g_cache_file.write(dumped_g_data)
+		g_cache_file.close()
+		print("Fresh headline data for " + artist + " written to cache.")
+
+		update_articles_table(output) 
+
+		return output
+
+
+get_headlines("Lionel Hampton")	
 
 
 #WIKIPEDIA - SCRAPE IT
@@ -438,7 +526,7 @@ def get_wiki_page(artist):
 
 
 
-get_wiki_page("Coleman Hawkins")
+#get_wiki_page("Coleman Hawkins")
 
 
 
