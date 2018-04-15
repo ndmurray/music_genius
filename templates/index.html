@@ -25,15 +25,34 @@
                 <h2 class="text-left">{{artist}}</h2>
                 <h3>Overview</h3>
                 <p>{{overview}}</p>
-                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                    <h3>Related Arists</h3>
-                    <ul>
-                    {% for item in related %}
-                        <li>{{item}}</li>
-                    {% endfor %}
-                    </ul>
-                </div>
+                <div class = "row">
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <h3>Top tracks in the US</h3>
+                        <ul>
+                        {% for item in top_tracks %}
+                            <li>{{item}}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
 
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <h3>Headlines</h3>
+                        <ul>
+                        {% for item in related %}
+                            <li>{{item}}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                        <h3>Related Arists</h3>
+                        <ul>
+                        {% for item in related %}
+                            <li>{{item}}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
                     
             </div>    
         </div>

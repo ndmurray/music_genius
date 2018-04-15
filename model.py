@@ -304,8 +304,8 @@ def get_top_tracks(artist):
 
 		return output
 
-#get_others_in_genre('Amy Winehouse')
-#search_artists('Amy Winehouse')
+get_others_in_genre('Janis Joplin')
+search_artists('Janis Joplin')
 get_top_tracks('Janis Joplin')
 
 #WIKIPEDIA - SCRAPE IT
