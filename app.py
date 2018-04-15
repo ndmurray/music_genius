@@ -10,13 +10,9 @@ app = Flask(__name__)
 #returns dictionary of artist name : URL
 def related_display(artist): 
 	related_data = model.get_others_in_genre(artist) #request data with functions defined in the model 
-	print(type(related_data))
-	print(related_data[0])
-	print(type(related_data[0]))
 	related_dict = {}
 	for item in related_data:
 		related_dict[item.name] = item.artist_url
-	print(related_dict)
 	return related_dict
 
 

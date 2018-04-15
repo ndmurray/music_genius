@@ -271,7 +271,7 @@ def search_artists(artist="Danny Brown"):
 def get_others_in_genre(artist):
 
 	base_url = "https://api.spotify.com/v1"
-	artist_clean = artist.replace(" ","_"+"_related")
+	artist_clean = artist.replace(" ","_") + "_related"
 
 	#Decide whether data comes from web or cache
 	unique_ident = unique_id(base_url,artist_clean)
@@ -293,7 +293,8 @@ def get_others_in_genre(artist):
 				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			output.append(artist_data)
 
-			return output
+		print(output)
+		return output
 
 	else:
 		print("Getting fresh related artist data from Spotify for " + artist)
