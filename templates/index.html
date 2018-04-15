@@ -28,27 +28,23 @@
                 <div class = "row">
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <h3>Top tracks in the US</h3>
-                        <ul>
-                        {% for item in top_tracks %}
-                            <li>{{item}}</li>
+                        <!-- <ul>
+                        {% for Track in top_tracks %}
+                            <li>{{Track.name}}</li>
                         {% endfor %}
-                        </ul>
+                        </ul> -->
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <h3>Headlines</h3>
-                        <ul>
-                        {% for item in related %}
-                            <li>{{item}}</li>
-                        {% endfor %}
-                        </ul>
+                    
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <h3>Related Arists</h3>
                         <ul>
-                        {% for item in related %}
-                            <li>{{item}}</li>
+                        {% for key in related %}
+                            <li><a href="{{related[key]}}">{{key}}</a></li>
                         {% endfor %}
                         </ul>
                     </div>

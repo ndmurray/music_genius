@@ -3,23 +3,50 @@ import model
 
 app = Flask(__name__)
 
+#Process objects for use on the web page
+
+#Arists 
+
+#returns dictionary of artist name : URL
+def related_display(artist): 
+	related_data = model.get_others_in_genre(artist) #request data with functions defined in the model 
+	print(type(related_data))
+	print(related_data[0])
+	print(type(related_data[0]))
+	related_dict = {}
+	for item in related_data:
+		related_dict[item.name] = item.artist_url
+	print(related_dict)
+	return related_dict
+
+
+#Tracks
+
+
+#Landing Page
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	try:
-		if request.method == 'POST':
-			artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
-			artist = model.search_artists(artist_input)[0][1]#First artist in search results
-			overview = model.get_wiki_page(artist)
-			related = model.get_others_in_genre(artist) #request data with functions defined in the model
-			top_tracks = model.get_top_tracks(artist)
-		else:
-			artist = "Danny Brown"
-			overview = model.get_wiki_page(artist)
-			related = model.get_others_in_genre(artist)
-			top_tracks = model.get_top_tracks(artist)
-		return render_template('index.html',artist=artist,related=related,overview=overview,top_tracks=top_tracks)
-	except:
-		return render_template('error.html')
+	# try:
+	if request.method == 'POST':
+		artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
+		artist = model.search_artists(artist_input)[0].name#First artist in search results
+
+		overview = model.get_wiki_page(artist)
+		related = related_display(artist)
+		
+		#top_track_names
+
+		
+		#top_tracks = 
+	else:
+		artist = "Danny Brown"
+		overview = model.get_wiki_page(artist)
+		related = related_display(artist)
+		#top_tracks = model.get_top_tracks(artist)
+
+	return render_template('index.html',artist=artist,related=related,overview=overview)
+	# except:
+		# return render_template('error.html')
 
 
 

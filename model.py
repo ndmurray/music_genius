@@ -51,7 +51,8 @@ def stand_up_db_tables():
 		'Genre' TEXT NOT NULL,
 		'Popularity' INTEGER NOT NULL,
 		'Followers' INTEGER NOT NULL,
-		'Image' TEXT NOT NULL
+		'Image' TEXT NOT NULL,
+		"URL" TEXT NOT NULL
 
 	)
 
@@ -81,13 +82,13 @@ def stand_up_db_tables():
 	conn.commit()
 	conn.close()
 
-def update_artists_table(output): #output is a list of tuples
+def update_artists_table(output): #output is a list Artist objects
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
 	data = output
 
 	for row in data:
-		cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?)",row)
+		cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",row.db_row())
 
 	conn.commit()
 	conn.close()
@@ -98,7 +99,7 @@ def update_tracks_table(output):
 	data = output
 
 	for row in data:
-		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?)",row)
+		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?)",row.db_row())
 
 	conn.commit()
 	conn.close()
@@ -120,7 +121,7 @@ try:
 	wiki_cache_file = open(WIKI_CACHE_FILE_NAME, 'r')
 	wiki_cache_str = wiki_cache_file.read()
 	WIKI_CACHE_DICT = json.loads(wiki_cache_str)
-	wiki_cache_file.close()
+	wiki_cache_file.close() #WIKI
 except:
 	WIKI_CACHE_DICT = {}
 
@@ -128,7 +129,7 @@ try:
 	sp_cache_file = open(SP_CACHE_FILE_NAME, 'r')
 	sp_cache_str = sp_cache_file.read()
 	SP_CACHE_DICT = json.loads(sp_cache_str)
-	sp_cache_file.close()
+	sp_cache_file.close()#SPOTIFY
 except:
 	SP_CACHE_DICT = {}
 
@@ -136,11 +137,9 @@ try:
 	g_cache_file = open(G_CACHE_FILE_NAME, 'r')
 	g_cache_str = g_cache_file.read()
 	G_CACHE_DICT = json.loads(g_cache_str)
-	g_cache_file.close()
+	g_cache_file.close() #GOOGLE
 except:
 	G_CACHE_DICT = {}
-
-
 
 ##Unique Ids
 
@@ -148,6 +147,45 @@ except:
 
 def unique_id(baseurl,artist):
 	return baseurl + "--" + artist
+
+
+#DEFINE CLASSES FOR ARTIST, TRACK, AND ARTICLE
+
+class Artist():
+	def __init__(self, spotify_id="None.", name="None.", genre="None.", popularity="None.", followers="None.", image_url="None.", artist_url="None."):
+		self.spotify_id = spotify_id	
+		self.name = name
+		self.genre = genre
+		self.popularity = popularity
+		self.followers = followers
+		self.image_url = image_url
+		self.artist_url = artist_url	
+
+	def db_row(self):
+		return (self.spotify_id, self.name, self.genre, self.popularity, self.followers, self.image_url, self.artist_url)
+
+	def __str__(self):
+		return self.name + ", " + self.genre + ", popularity = " + str(self.popularity)
+
+class Track():
+	def __init__(self="None.", spotify_id="None.", name="None.", artist="None.", popularity="None.", album="None.", release_date=""):
+		self.spotify_id = spotify_id	
+		self.name = name
+		self.artist = artist
+		self.popularity = popularity
+		self.album = album
+		self.release_date = release_date
+
+	def db_row(self):
+		return (self.spotify_id, self.name, self.artist, self.popularity, self.album, self.release_date)
+
+	def __str__(self):
+		return '"' + self.name + '" by ' + self.artist + '. Off of "' + self.album + ", " +self.release_date
+
+class Headline():
+
+	pass
+
 
 
 #SPOTIFY AUTHENTICATION
@@ -191,7 +229,19 @@ def search_artists(artist="Danny Brown"):
 	if unique_ident in SP_CACHE_DICT:
 		#Get data from cache
 		print("Getting cached Spotify data for " + artist)
-		return SP_CACHE_DICT[unique_ident]
+		results = SP_CACHE_DICT[unique_ident]
+		output = []
+		for item in results['artists']['items']:
+			if len(item['genres']) < 1 and len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+			elif len(item['genres']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+			elif len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+			else:
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+			output.append(artist_data)
+		return output
 	else:
 		#Pull new data and format it
 		print("Getting fresh data from Spotify for " + artist)
@@ -199,29 +249,24 @@ def search_artists(artist="Danny Brown"):
 		output = []
 		for item in results['artists']['items']:
 			if len(item['genres']) < 1 and len(item['images']) < 1:
-				artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image")
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image")
 			elif len(item['genres']) < 1:
-				artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
 			elif len(item['images']) < 1:
-				artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image")
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image")
 			else:
-				artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
 			output.append(artist_data)
 		
 		#Write new spotify data to the cache
 		print("Writing stankin' fresh Spotify data for " + artist + " to the cache.")
-		SP_CACHE_DICT[unique_ident] = output
+		SP_CACHE_DICT[unique_ident] = results
 		dumped_sp_data = json.dumps(SP_CACHE_DICT)
 		sp_cache_file = open(SP_CACHE_FILE_NAME, 'w')
 		sp_cache_file.write(dumped_sp_data)
 		sp_cache_file.close()
-		print("Fresh data for " + artist + " writtent to cache.")
+		print("Fresh data for " + artist + " written to cache.")
 		return output
-
-
-#Playlist search based on genre from first result in artist search
-## - later we'll change this to let the user pick the artist to show results based on 
-## - Need to work out how to sort response by popularity, otherwise we might have to toss this
 
 def get_others_in_genre(artist):
 
@@ -234,25 +279,44 @@ def get_others_in_genre(artist):
 	if unique_ident in SP_CACHE_DICT:
 		#Get data from cache
 		print("Getting cached related artist data for " + artist)
-		return SP_CACHE_DICT[unique_ident]
+		results = SP_CACHE_DICT[unique_ident]
+		output = []
+
+		for item in results['artists']:
+			if len(item['genres']) < 1 and len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+			elif len(item['genres']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+			elif len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+			else:
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+			output.append(artist_data)
+
+			return output
+
 	else:
 		print("Getting fresh related artist data from Spotify for " + artist)
 		search_results = search_artists(artist)
-		artist = search_results[0][0] #id from first artist for now
-		artist_display =  search_results[0][1]
+		artist = search_results[0].spotify_id #id from first artist for now
+		artist_display =  search_results[0].name
 		results = SP.artist_related_artists(artist)
 		output = []
 
 		for item in results['artists']:
-			if len(item['genres']) < 1:
-				artist_data = (item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
+			if len(item['genres']) < 1 and len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image")
+			elif len(item['genres']) < 1:
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
+			elif len(item['images']) < 1:
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image")
 			else:
-				artist_data = (item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
 			output.append(artist_data)
 
 		#Write new spotify data to the cache
 		print("Writing related Spotify data for " + artist_display + " to the cache.")
-		SP_CACHE_DICT[unique_ident] = output
+		SP_CACHE_DICT[unique_ident] = results
 		dumped_sp_data = json.dumps(SP_CACHE_DICT)
 		sp_cache_file = open(SP_CACHE_FILE_NAME, 'w')
 		sp_cache_file.write(dumped_sp_data)
@@ -274,25 +338,31 @@ def get_top_tracks(artist):
 	if unique_ident in SP_CACHE_DICT:
 		#Get data from cache
 		print("Getting " + artist + "'s top tracks.")
-		return SP_CACHE_DICT[unique_ident]
+		results = SP_CACHE_DICT[unique_ident]
+		output = []
+		for item in results['tracks']:
+			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
+			output.append(track_data)
+
+		return output
 
 	else:
-		print("Getting fresh related artist data from Spotify for " + artist)
+		print("Getting fresh top tracks for " + artist)
 		search_results = search_artists(artist)
-		artist = search_results[0][0] #id from first artist for now
-		artist_display =  search_results[0][1]
+		artist = search_results[0].spotify_id #id (Artist class) from first artist for now
+		artist_display =  search_results[0].name #name, form the Artist class
 		results = SP.artist_top_tracks(artist, country="US")
 		output = []
 
 		for item in results['tracks']:
-			track_data = (item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
+			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],)
 			output.append(track_data)
 
 
 
 		# #Write new spotify data to the cache
 		print("Writing top tracks data for " + artist_display + " to the cache.")
-		SP_CACHE_DICT[unique_ident] = output
+		SP_CACHE_DICT[unique_ident] = results
 		dumped_sp_data = json.dumps(SP_CACHE_DICT)
 		sp_cache_file = open(SP_CACHE_FILE_NAME, 'w')
 		sp_cache_file.write(dumped_sp_data)
@@ -302,14 +372,24 @@ def get_top_tracks(artist):
 		#Update the database
 		update_tracks_table(output)
 
+		print("TRAKCS OUTPUT")
+		print(output)
+
 		return output
 
-get_others_in_genre('Janis Joplin')
-search_artists('Janis Joplin')
-get_top_tracks('Janis Joplin')
+get_others_in_genre('Charlie Parker')
+search_artists('Charlie Parker')
+get_top_tracks('Charlie Parker')
+
+
+#GOOGLE NEWS 
+
+
+def get_headlines(artist):
+	pass
+
 
 #WIKIPEDIA - SCRAPE IT
-
 
 #Scrape code wiki overview
 def scrape_wiki_overview(page_text):
@@ -349,13 +429,13 @@ def get_wiki_page(artist):
 		wiki_cache_file = open(WIKI_CACHE_FILE_NAME, 'w')
 		wiki_cache_file.write(dumped_wiki_data)
 		wiki_cache_file.close()
-		print("Fresh data for " + artist + " writtent to cache.")
+		print("Fresh data for " + artist + " written to cache.")
 		return overview
 
 
 
 
-get_wiki_page("Janis Joplin")
+get_wiki_page("Charlie Parker")
 
 
 
