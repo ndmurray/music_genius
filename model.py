@@ -10,6 +10,11 @@ import spotipy.util as util
 #ISSUES
 ##Clear the cache before you run this thing for real, so that Danny Brown's data is in the db
 
+##You need to relate two tables somehow
+
+##Make sure to turn the 404 page on for 'graceful error handling'
+
+
 #SET UP THE DATABASE
 
 DBNAME = "mg.sqlite"
@@ -346,13 +351,13 @@ def get_others_in_genre(artist):
 
 		for item in results['artists']:
 			if len(item['genres']) < 1 and len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image")
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
 			elif len(item['genres']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'])
+				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			elif len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image")
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
 			else:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'])
+				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			output.append(artist_data)
 
 		#Write new spotify data to the cache

@@ -20,8 +20,16 @@ def track_display(artist):
 	track_data = model.get_top_tracks(artist)
 	track_dict = {}
 	for item in track_data:
-		track_dict[item.name] = item
+		track_dict[item.name] = item.track_url
 	return track_dict
+
+#Articles
+def article_display(artist):
+	article_data =  model.get_headlines(artist)
+	article_dict = {}
+	for item in article_data:
+		article_dict[item.title] = item.url
+	return article_dict
 
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
@@ -34,14 +42,17 @@ def index():
 		overview = model.get_wiki_page(artist)
 		related = related_display(artist)
 		tracks = track_display(artist)
+		articles = article_display(artist)
 			
 	else:
 		artist = "Danny Brown"
 		overview = model.get_wiki_page(artist)
 		related = related_display(artist)
 		tracks = track_display(artist)
+		articles = article_display(artist)
 
-	return render_template('index.html',artist=artist,related=related,overview=overview,tracks=tracks)
+
+	return render_template('index.html',artist=artist,related=related,overview=overview,tracks=tracks,articles=articles)
 	# except:
 		# return render_template('error.html')
 

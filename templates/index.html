@@ -37,7 +37,11 @@
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                         <h3>Headlines</h3>
-                    
+                        <ul>
+                        {% for key in articles %}
+                            <li>{{key}}</li>
+                        {% endfor %}
+                        </ul>
                     </div>
 
                     <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
