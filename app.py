@@ -34,27 +34,28 @@ def article_display(artist):
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	# try:
-	if request.method == 'POST':
-		artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
-		artist = model.search_artists(artist_input)[0].name#First artist in search results
+	try:
+		if request.method == 'POST':
+			artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
+			artist = model.search_artists(artist_input)[0].name#First artist in search results
 
-		overview = model.get_wiki_page(artist)
-		related = related_display(artist)
-		tracks = track_display(artist)
-		articles = article_display(artist)
+			overview = model.get_wiki_page(artist)
+			related = related_display(artist)
+			tracks = track_display(artist)
+			articles = article_display(artist)
+				
+		else:
+			artist = "Danny Brown"
+			overview = model.get_wiki_page(artist)
+			related = related_display(artist)
+			tracks = track_display(artist)
+			articles = article_display(artist)
 			
-	else:
-		artist = "Danny Brown"
-		overview = model.get_wiki_page(artist)
-		related = related_display(artist)
-		tracks = track_display(artist)
-		articles = article_display(artist)
 
 
-	return render_template('index.html',artist=artist,related=related,overview=overview,tracks=tracks,articles=articles)
-	# except:
-		# return render_template('error.html')
+		return render_template('index.html',artist=artist,related=related,overview=overview,tracks=tracks,articles=articles)
+	except:
+		return render_template('error.html')
 
 
 

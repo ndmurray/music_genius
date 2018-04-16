@@ -32,6 +32,11 @@ def create_mg_db():
 	cur.execute(statement)
 
 	statement = '''
+		DROP TABLE IF EXISTS 'RelatedArtists';
+	'''
+	cur.execute(statement)
+
+	statement = '''
 		DROP TABLE IF EXISTS 'Tracks';
 	'''
 	cur.execute(statement)
@@ -65,6 +70,25 @@ def stand_up_db_tables():
 
 	cur.execute(statement)
 
+	#Related Artists
+	statement = '''
+	CREATE TABLE 'RelatedArtists' (
+		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
+		'Spotify_Id' TEXT NOT NULL,
+		'Name' TEXT NOT NULL,
+		'Genre' TEXT NOT NULL,
+		'Popularity' INTEGER NOT NULL,
+		'Followers' INTEGER NOT NULL,
+		'Image' TEXT NOT NULL,
+		'URL' TEXT NOT NULL,
+		'Searched_Artist_Id' INTEGER 
+
+	)
+
+	'''
+
+	cur.execute(statement)
+
 	#Tracks
 	statement = '''
 	CREATE TABLE 'Tracks' (
@@ -74,7 +98,7 @@ def stand_up_db_tables():
 		'Artist' TEXT NOT NULL,
 		'Popularity' INTEGER NOT NULL,
 		'Album' TEXT NOT NULL,
-		'Release Date' TEXT NOT NULL,
+		'Release_Date' TEXT NOT NULL,
 		'URL' TEXT NOT NULL
 
 	)
@@ -102,14 +126,39 @@ def stand_up_db_tables():
 	conn.commit()
 	conn.close()
 
-def update_artists_table(output): #output is a list Artist objects
+def update_artists_table(output): #output is the classed first result of the API call (not a list of classed objects like the others)
+	conn = sqlite3.connect(DBNAME)
+	cur = conn.cursor()
+	data = output #DB log just first result
+
+	#Load in data from API
+	cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",data.db_row())
+
+	conn.commit()
+	conn.close()
+
+
+def update_related_artists_table(output): #output is a list Artist objects
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
 	data = output
 
+	#Load in data from API
 	for row in data:
-		cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",row.db_row())
+		cur.execute("INSERT INTO RelatedArtists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())	
 
+	#update related artists with searched artist id
+	statement = """
+	UPDATE RelatedArtists
+	SET Searched_Artist_Id = (
+		SELECT MAX(Id) --The ID of the last artist added to the databse, because the search artist and related artist functions run in sequence, this will always be the right artist
+		FROM Artists
+	) 
+	WHERE Searched_Artist_Id IS NULL
+
+	"""
+
+	cur.execute(statement)
 	conn.commit()
 	conn.close()
 
@@ -118,6 +167,7 @@ def update_tracks_table(output):
 	cur = conn.cursor()
 	data = output
 
+	#Load in data from API
 	for row in data:
 		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",row.db_row())
 
@@ -129,6 +179,7 @@ def update_articles_table(output):
 	cur = conn.cursor()
 	data = output
 
+	#Load in data from API
 	for row in data:
 		cur.execute("INSERT INTO Articles VALUES(NULL, ?, ?, ?, ?, ?)",row.db_row())
 
@@ -311,6 +362,9 @@ def search_artists(artist="Danny Brown"):
 		sp_cache_file.write(dumped_sp_data)
 		sp_cache_file.close()
 		print("Fresh data for " + artist + " written to cache.")
+
+
+		update_artists_table(output[0])	#DB log just the first result
 		return output
 
 def get_others_in_genre(artist):
@@ -349,7 +403,7 @@ def get_others_in_genre(artist):
 		results = SP.artist_related_artists(artist)
 		output = []
 
-		for item in results['artists']:
+		for item in results['artists']: #first result only
 			if len(item['genres']) < 1 and len(item['images']) < 1:
 				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
 			elif len(item['genres']) < 1:
@@ -370,7 +424,7 @@ def get_others_in_genre(artist):
 		print("Fresh related artist data for " + artist_display + " written to cache.")
 
 		#Update the database
-		update_artists_table(output)
+		update_related_artists_table(output) 
 
 		return output
 
@@ -469,7 +523,7 @@ def get_headlines(artist):
 
 
 		#Write new data to cache
-		print("Writing headline data for " + artist + "to cache.")
+		print("Writing headline data for " + artist + " to cache.")
 		G_CACHE_DICT[unique_ident] = results
 		dumped_g_data = json.dumps(G_CACHE_DICT)
 		g_cache_file = open(G_CACHE_FILE_NAME, 'w')
@@ -482,7 +536,7 @@ def get_headlines(artist):
 		return output
 
 
-get_headlines("Lionel Hampton")	
+#get_headlines("Lionel Hampton")	
 
 
 #WIKIPEDIA - SCRAPE IT
