@@ -84,7 +84,7 @@ class TestCalls(unittest.TestCase):
 
 #These calls test that data was properly stored in the database
 
-class TestCalls(unittest.TestCase):
+class TestStorage(unittest.TestCase):
 
 	def testArtistStorage(self):
 		
@@ -99,8 +99,47 @@ class TestCalls(unittest.TestCase):
 
 		conn.close()
 
-			
+	def testRelatedStorage(self):
+		
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
 
+		statement = "SELECT Name FROM RelatedArtists"
+		result = cur.execute(statement).fetchone()
+		print(result)
+
+		self.assertEqual(str(result[0]),"Duffy")
+
+		conn.close()
+
+	def testTrackStorage(self):
+		
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+
+		statement = "SELECT Name FROM Tracks"
+		result = cur.execute(statement).fetchone()
+		print(result)
+
+		self.assertEqual(str(result[0]),"Me and Bobby McGee")
+
+		conn.close()
+
+	def testArticleStorage(self):
+		
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+
+		statement = "SELECT Title FROM Articles"
+		result = cur.execute(statement).fetchone()
+		print(result)
+
+		self.assertEqual(str(result[0]),"Danny Brown")
+
+		conn.close()
+
+
+clear_cache()
 
 
 

@@ -47,6 +47,7 @@ def create_mg_db():
 	cur.execute(statement)
 
 	conn.commit()
+	conn.close()
 
 def stand_up_db_tables():
 	conn = sqlite3.connect(DBNAME)
