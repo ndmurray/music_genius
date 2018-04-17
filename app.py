@@ -72,7 +72,7 @@ def index():
 		articles = article_display(artist_name)
 			
 	else:
-		artist_result = model.search_artists("Danny Brown")[0]#
+		artist_result = model.search_artists("Amy Winehouse")[0]#
 		artist_name = artist_result.name
 		image_url = artist_result.image_url
 		overview = model.get_wiki_page(artist_name)

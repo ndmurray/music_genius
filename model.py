@@ -572,7 +572,7 @@ def scrape_wiki_overview(page_text):
 	container = soup.find('div',attrs={'class':'mw-parser-output'})
 	paras = container.find_all('p')
 
-	for p in paras[:1]: #First 2 paragraphs only
+	for p in paras[:2]: #First 2 paragraphs only
 		overview += "\n" + p.text + "\n"
 
 	return overview

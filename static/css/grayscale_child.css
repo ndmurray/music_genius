@@ -1,5 +1,6 @@
 /*NM ADDED STYLES*/
-
+/*Montserrat font*/
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
 
 /*Navbar styles*/
 
@@ -24,8 +25,8 @@ p#artist-name {
   vertical-align: middle;
   font-size: 2em;
   margin-bottom: 0px;
-
 }
+
 
 /*Top row - artist photo and overview*/
 
@@ -35,8 +36,8 @@ p#artist-name {
 div.intro-body {
   background-repeat: no-repeat;
   background-size: cover;
-  background-position: 0% 40%;
-  background-color: rgba(0,0,0,0.5);
+  background-position: center;
+  /*background-color: rgba(0,0,0,0.5);*/
   /*opacity: 0.5;*/
 }
 
@@ -55,11 +56,8 @@ div.intro-body {
 /*Push down entire wrapper*/
 
 .container.mg-body {
-    margin-top: 16em;
+    margin-top: 8em;
 }
-
-
-
 
 img {
   max-width: 100%;
@@ -67,11 +65,42 @@ img {
 
 }
 
+/*Elements*/
+
+h5, ul, li {
+  text-align: left;
+}
+
+h5 {
+  margin-bottom: 0.5em !important;
+}
+
+ul {
+  padding-left: 0px;
+  list-style-type: none;
+}
+
+div.wrapper-row {
+  height: 20em;
+}
+
+p#overview {
+  text-align: left;
+  background-color: rgba(0,0,0,0.5);
+  padding: 1.5em;
+}
+
+.headlines, .related, .top {
+  text-align: left;
+  background-color: rgba(0,0,0,0.5);
+  padding: 1.5em;
+  }
 
 /*END NM ADDED STYLES*/
 
 body {
-  font-family: 'Lora', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  /*font-family: 'Lora', 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
+  font-family: 'Montserrat';
   position: relative;
   width: 100%;
   height: 100%;

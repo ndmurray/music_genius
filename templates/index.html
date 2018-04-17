@@ -62,41 +62,48 @@
       <div class="intro-body" style="background-image:url('{{image_url}}');">
         <div class="container mg-body">
           <!--Info rows-->
-          <div class = "row">
-             <!-- <div class="dummy col-xs-6 col-sm-6 col-md-6 col-lg-6">
+             
+             
+             <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                </div>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                  <ul class="top">
+                  <h5>Top Tracks</h5>
+                  {% for key in tracks %}
+                     <li>{{key}}</li>
+                  {% endfor %}
+                  </ul>
+               </div>
+               <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                  
+                  <ul class="related">
+                  <h5>Related Artists</h5>
+                  {% for key in related %}
+                      <li><a href="{{related[key]}}">{{key}}</a></li>
+                  {% endfor %}
+                  </ul>
+               </div>
+             </div>
+             <div class="row">
+               <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+               </div>
+               <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <ul class="headlines">
+                  <h5>In the news</h5>
+                  {% for key in articles %}
+                       <li>{{key}}</li>
+                  {% endfor %}
+                  </ul>
+               </div>
+             </div>
                
-             </div> -->
-             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-               <h3>Top tracks in the US</h3>
-                 <ul>
-                 {% for key in tracks %}
-                     <li>{{key}}</li>
-                 {% endfor %}
-                 </ul>
-             </div>
 
-             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <h3>Headlines</h3>
-                <ul>
-                {% for key in articles %}
-                     <li>{{key}}</li>
-                {% endfor %}
-                </ul>
-             </div>
-
-             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <h3>Related Arists</h3>
-                <ul>
-                {% for key in related %}
-                    <li><a href="{{related[key]}}">{{key}}</a></li>
-                {% endfor %}
-                </ul>
-             </div>
+             
           <!--Overview-->
           <p id="overview">{{overview}}</p>
         
           
-          </div>
         </div>
     </div>
   </div>
