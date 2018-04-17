@@ -45,6 +45,7 @@
               <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
             </li>
           </ul> -->
+          <p id="artist-name">{{artist_name}}</h5>
           <form action="/" method="post">
               <input type="text" class="form-control form-control-sm" id="validationCustom03" placeholder="Enter an artist name" name="artist-entry" required>
                                                         
@@ -56,65 +57,53 @@
     </nav>
 
     <!-- Intro Header -->
+    <!-- <div class="layer"></div> -->
     <header class="masthead">
-      <div class="intro-body">
+      <div class="intro-body" style="background-image:url('{{image_url}}');">
         <div class="container mg-body">
-          <div class="row">
-            <div class="col-lg-12 mx-auto">
-              <h2 class="text-left">{{artist}}</h2>
-              <h3>Overview</h3>
-              <p>{{overview}}</p>
-              <div class = "row">
-                 <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                   <h3>Top tracks in the US</h3>
-                     <ul>
-                     {% for key in tracks %}
-                         <li>{{key}}</li>
-                     {% endfor %}
-                     </ul>
-                 </div>
+          <!--Info rows-->
+          <div class = "row">
+             <!-- <div class="dummy col-xs-6 col-sm-6 col-md-6 col-lg-6">
+               
+             </div> -->
+             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+               <h3>Top tracks in the US</h3>
+                 <ul>
+                 {% for key in tracks %}
+                     <li>{{key}}</li>
+                 {% endfor %}
+                 </ul>
+             </div>
 
-                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <h3>Headlines</h3>
-                    <ul>
-                    {% for key in articles %}
-                         <li>{{key}}</li>
-                    {% endfor %}
-                    </ul>
-                </div>
+             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Headlines</h3>
+                <ul>
+                {% for key in articles %}
+                     <li>{{key}}</li>
+                {% endfor %}
+                </ul>
+             </div>
 
-                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <h3>Related Arists</h3>
-                    <ul>
-                    {% for key in related %}
-                        <li><a href="{{related[key]}}">{{key}}</a></li>
-                    {% endfor %}
-                    </ul>
-                </div>
-            </div>
-
-
-
-
+             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Related Arists</h3>
+                <ul>
+                {% for key in related %}
+                    <li><a href="{{related[key]}}">{{key}}</a></li>
+                {% endfor %}
+                </ul>
+             </div>
+          <!--Overview-->
+          <p id="overview">{{overview}}</p>
+        
+          
+          </div>
         </div>
-      </div>
-     </div>
     </div>
-
-      <!--START CONTENT YAA-->
-
-      <div class="row">
-              
-      </div>
-      
-
-
-
-
-
-    </header>
+  </div>
+</header>
 
     <!-- About Section -->
+    <!--
     <section id="about" class="content-section text-center">
       <div class="container">
         <div class="row">
@@ -127,11 +116,12 @@
               along with a custom Google Maps skin courtesy of
               <a href="http://snazzymaps.com/">Snazzy Maps</a>.</p>
             <p>Grayscale includes full HTML, CSS, and custom JavaScript files along with SASS and LESS files for easy customization!</p>
-          </div>-->
+          </div>
         </div>
       </div>
     </section>
-
+    -->
+    
 <!--Leaving the rest of this out for now-->
 
     <!-- Download Section -->
