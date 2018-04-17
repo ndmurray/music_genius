@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Grayscale - Start Bootstrap Theme</title>
+    <title>Music Genius</title>
 
     <!-- Bootstrap core CSS -->
     <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +19,7 @@
     <link href='https://fonts.googleapis.com/css?family=Cabin:700' rel='stylesheet' type='text/css'>
 
     <!-- Custom styles for this template -->
-    <link href="static/css/grayscale.min.css" rel="stylesheet">
+    <link href="static/css/grayscale_child.css" rel="stylesheet">
 
   </head>
 
@@ -33,7 +33,7 @@
           Menu
           <i class="fa fa-bars"></i>
         </button>
-        <div class="collapse navbar-collapse" id="navbarResponsive">
+       <!-- <div class="collapse navbar-collapse" id="navbarResponsive">-->
        <!--    <ul class="navbar-nav ml-auto">
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="#about">About</a>
@@ -45,20 +45,20 @@
               <a class="nav-link js-scroll-trigger" href="#contact">Contact</a>
             </li>
           </ul> -->
-          <form class="ml-5" action="/" method="post">
+          <form action="/" method="post">
               <input type="text" class="form-control form-control-sm" id="validationCustom03" placeholder="Enter an artist name" name="artist-entry" required>
                                                         
-              <button class="btn btn-default col-2" method="POST" type="submit">Go!</button>
+              <button class="btn btn-default" method="POST" type="submit">Go!</button>
                                 <!--   <input type="submit"> -->
           </form>
-        </div>
+        <!--</div>-->
       </div>
     </nav>
 
     <!-- Intro Header -->
     <header class="masthead">
       <div class="intro-body">
-        <div class="container">
+        <div class="container mg-body">
           <div class="row">
             <div class="col-lg-12 mx-auto">
               <h2 class="text-left">{{artist}}</h2>
