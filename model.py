@@ -99,7 +99,8 @@ def stand_up_db_tables():
 		'Popularity' INTEGER NOT NULL,
 		'Album' TEXT NOT NULL,
 		'Release_Date' TEXT NOT NULL,
-		'URL' TEXT NOT NULL
+		'URL' TEXT NOT NULL,
+		'Searched_Artist_Id' INTEGER
 
 	)
 
@@ -113,9 +114,10 @@ def stand_up_db_tables():
 		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
 		'Title' TEXT NOT NULL,
 		'Source' TEXT NOT NULL,
-		'Description' TEXT NOT NULL,
+		'Description' TEXT,
 		'PublishedAt' TEXT NOT NULL,
-		'URL' TEXT NOT NULL
+		'URL' TEXT NOT NULL, 
+		'Searched_Artist_Id' INTEGER
 
 	)
 
@@ -169,8 +171,20 @@ def update_tracks_table(output):
 
 	#Load in data from API
 	for row in data:
-		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",row.db_row())
+		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())
 
+
+	statement = """
+	UPDATE Tracks
+	SET Searched_Artist_Id = (
+		SELECT MAX(Id) --The ID of the last artist added to the databse, because the search artist and related artist functions run in sequence, this will always be the right artist
+		FROM Artists
+	) 
+	WHERE Searched_Artist_Id IS NULL
+
+	"""
+
+	cur.execute(statement)
 	conn.commit()
 	conn.close()
 
@@ -181,8 +195,19 @@ def update_articles_table(output):
 
 	#Load in data from API
 	for row in data:
-		cur.execute("INSERT INTO Articles VALUES(NULL, ?, ?, ?, ?, ?)",row.db_row())
+		cur.execute("INSERT INTO Articles VALUES(NULL, ?, ?, ?, ?, ?, NULL)",row.db_row())
 
+	statement = """
+	UPDATE Articles
+	SET Searched_Artist_Id = (
+		SELECT MAX(Id) --The ID of the last artist added to the databse, because the search artist and related artist functions run in sequence, this will always be the right artist
+		FROM Artists
+	) 
+	WHERE Searched_Artist_Id IS NULL
+
+	"""
+
+	cur.execute(statement)
 	conn.commit()
 	conn.close()
 
@@ -392,7 +417,6 @@ def get_others_in_genre(artist):
 				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			output.append(artist_data)
 
-		print(output)
 		return output
 
 	else:
@@ -473,13 +497,9 @@ def get_top_tracks(artist):
 		update_tracks_table(output)
 
 		print("TRAKCS OUTPUT")
-		print(output)
 
 		return output
 
-#get_others_in_genre('Coleman Hawkins')
-#search_artists('Coleman Hawkins')
-#get_top_tracks('Coleman Hawkins')
 
 
 #GOOGLE NEWS 
@@ -536,7 +556,10 @@ def get_headlines(artist):
 		return output
 
 
-#get_headlines("Lionel Hampton")	
+# get_others_in_genre('Coleman Hawkins')
+# search_artists('Coleman Hawkins')
+# get_top_tracks('Coleman Hawkins')
+# get_headlines('Coleman Hawkins')
 
 
 #WIKIPEDIA - SCRAPE IT
