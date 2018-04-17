@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+    <head>
+        <title>MusicGenius</title>
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <link rel='stylesheet' href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+
+    </head>
+
+    <body>
+        
+        <div class="container">
+            <div class="fixed-top">
+                <div class="row">
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <h1>Music Genius</h1>
+                    </div>
+                    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                        <form class="ml-5" action="/" method="post">
+                            <input type="text" class="form-control form-control-sm" id="validationCustom03" placeholder="Enter an artist name" name="artist-entry" required>
+                                                                  
+                            <button class="btn btn-default col-2" method="POST" type="submit">Go!</button>
+                                          <!--   <input type="submit"> -->
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <h2 class="text-left">{{artist}}</h2>
+        <h3>Overview</h3>
+        <p>{{overview}}</p>
+        <div class = "row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Top tracks in the US</h3>
+                <ul>
+                {% for key in tracks %}
+                    <li>{{key}}</li>
+                {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Headlines</h3>
+                <ul>
+                {% for key in articles %}
+                    <li>{{key}}</li>
+                {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h3>Related Arists</h3>
+                <ul>
+                {% for key in related %}
+                    <li><a href="{{related[key]}}">{{key}}</a></li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+                    
+
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+    </body>
+</html>
+

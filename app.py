@@ -48,6 +48,13 @@ def article_display(artist):
 		article_dict[item.title] = item.url
 	return article_dict
 
+
+#Staging lainding page
+
+@app.route('/index2', methods=['GET', 'POST'])
+def staging():
+	return render_template('index2.html',artist=artist,related=related,overview=overview,tracks=tracks,articles=articles)
+
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
 def index():
