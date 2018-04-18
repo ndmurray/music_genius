@@ -45,7 +45,7 @@ def article_display(artist):
 	article_data =  model.get_headlines(artist)
 	article_dict = {}
 	for item in article_data[:5]:#Only top 5
-		article_dict[item.title] = item.url
+		article_dict[item.title] = [item.url, item.source, item.published_at]
 	return article_dict
 
 

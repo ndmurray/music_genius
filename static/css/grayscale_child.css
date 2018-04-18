@@ -80,10 +80,6 @@ ul {
   list-style-type: none;
 }
 
-div.wrapper-row {
-  height: 20em;
-}
-
 p#overview {
   text-align: left;
   background-color: rgba(0,0,0,0.5);
@@ -95,6 +91,12 @@ p#overview {
   background-color: rgba(0,0,0,0.5);
   padding: 1.5em;
   }
+
+span.source {
+  font-style: italic;
+  color: #bdbdbd;
+
+}
 
 /*END NM ADDED STYLES*/
 

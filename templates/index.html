@@ -92,7 +92,7 @@
                   <ul class="headlines">
                   <h5>In the news</h5>
                   {% for key in articles %}
-                       <li><a href="{{articles[key]}}" target="_blank">{{key}}</a></li>
+                       <li><a href="{{articles[key][0]}}" target="_blank">{{key}}</a><span class="source"><br />{{articles[key][1]}}: {{articles[key][2]}} </span></li>
                   {% endfor %}
                   </ul>
                </div>
@@ -194,7 +194,7 @@
     <!-- Footer -->
     <footer>
       <div class="container text-center">
-        <p>Copyright &copy; Your Website 2018</p>
+        <p>Copyright &copy; 2018. Data courtesy of Spotify, Wikipeida, and Google News. Non-Commercial purposes. Contact <a href="http://nickm.io" target="_blank">Nick</a> for more info.</p> 
       </div>
     </footer>
 
