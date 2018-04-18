@@ -71,7 +71,7 @@
                   <ul class="top">
                   <h5>Top Tracks</h5>
                   {% for key in tracks %}
-                     <li>{{key}}</li>
+                     <li><a href="{{tracks[key]}}" target="_blank">{{key}}</a></li>
                   {% endfor %}
                   </ul>
                </div>
@@ -80,7 +80,7 @@
                   <ul class="related">
                   <h5>Related Artists</h5>
                   {% for key in related %}
-                      <li><a href="{{related[key]}}">{{key}}</a></li>
+                      <li><a href="{{related[key]}}" target="_blank">{{key}}</a></li>
                   {% endfor %}
                   </ul>
                </div>
@@ -92,7 +92,7 @@
                   <ul class="headlines">
                   <h5>In the news</h5>
                   {% for key in articles %}
-                       <li>{{key}}</li>
+                       <li><a href="{{articles[key]}}" target="_blank">{{key}}</a></li>
                   {% endfor %}
                   </ul>
                </div>

@@ -531,7 +531,9 @@ def get_headlines(artist):
 		artist_display = search_results[0].name
 		params_dict = {
 			'apiKey': GOOGLE_API_KEY,
-			'q': artist
+			'q': artist,
+			'sortBy': 'popularity'
+
 		}
 
 		results = json.loads(requests.get(base_url, params_dict).text)
