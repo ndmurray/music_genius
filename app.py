@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request
 import model
+import sqlite3
 
 app = Flask(__name__)
 
+#Import DB reference from model
+DBNAME = model.DBNAME
 
 #Clear cache
 def clear_cache():
@@ -20,32 +23,102 @@ def clear_cache():
 
 clear_cache()
 
-#Process objects for use on the web page
+#Pull DB data for use on the web page
 
 #Arists 
 
 #returns dictionary of artist name : URL
 def related_display(artist): 
-	related_data = model.get_others_in_genre(artist) #request data with functions defined in the model 
+
+	try:
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+	except Error as e:
+		print(e)
+
+	#request data and log it in the DB
+	model.get_others_in_genre(artist) 
+
+	#Top five related artists that link to the most recent artist added to the artists table (this table contains all artists the user searched)
+	statement = """
+	SELECT r.Name, r.URL
+	FROM RelatedArtists as r
+	JOIN Artists AS a
+		ON r.Searched_Artist_Id = a.Id
+	ORDER BY r.Searched_Artist_Id DESC
+	LIMIT 5
+	"""
+
+	pull = cur.execute(statement).fetchall()
+
+	print("THE FETCH")
+	print(pull)
+
 	related_dict = {}
-	for item in related_data[:5]: #Only top 5
-		related_dict[item.name] = item.image_url
+	for row in pull: 
+		related_dict[row[0]] = row[1]
 	return related_dict
+
+	conn.close()
 
 #Tracks
 def track_display(artist):
-	track_data = model.get_top_tracks(artist)
+
+	try:
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+	except Error as e:
+		print(e)
+
+	#Make the reuest and log to db
+	model.get_top_tracks(artist)
+
+	#Top five tracks that link to the most recent artist added to the artists table (this table contains all artists the user searched)
+	statement = """
+	SELECT t.Name, t.URL
+	FROM Tracks as t
+	JOIN Artists AS a
+		ON t.Searched_Artist_Id = a.Id
+	ORDER BY t.Searched_Artist_Id DESC
+	LIMIT 5
+	"""
+
+	pull = cur.execute(statement).fetchall()
+
 	track_dict = {}
-	for item in track_data[:5]: #Only top 5
-		track_dict[item.name] = item.track_url
+	for row in pull: #Only top 5
+		track_dict[row[0]] = row[1]
 	return track_dict
+
+	conn.close()
 
 #Articles
 def article_display(artist):
-	article_data =  model.get_headlines(artist)
+
+	try:
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+	except Error as e:
+		print(e)
+
+	#Make the request and log it to the DB
+	model.get_headlines(artist)
+
+	#Top five articles that link to the most recent artist added to the artists table (this table contains all artists the user searched)
+	statement = """
+	SELECT h.Title, h.URL, h.Source, h.PublishedAt
+	FROM Articles as h
+	JOIN Artists AS a
+		ON h.Searched_Artist_Id = a.Id
+	ORDER BY h.Searched_Artist_Id DESC
+	LIMIT 5
+	"""
+
+	pull = cur.execute(statement).fetchall()
+
 	article_dict = {}
-	for item in article_data[:5]:#Only top 5
-		article_dict[item.title] = [item.url, item.source, item.published_at]
+	for row in pull:#Only top 5
+		article_dict[row[0]] = [row[1], row[2], row[3]]
 	return article_dict
 
 
@@ -58,33 +131,33 @@ def staging():
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	try:
-		if request.method == 'POST':
-			artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
-			artist_result = model.search_artists(artist_input)[0]#First artist in search results
-			artist_name = artist_result.name
-			image_url = artist_result.image_url
+	# try:
+	if request.method == 'POST':
+		artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
+		artist_result = model.search_artists(artist_input)[0]#First artist in search results
+		artist_name = artist_result.name
+		image_url = artist_result.image_url
 
 
-			overview = model.get_wiki_page(artist_name)
-			related = related_display(artist_name)
-			tracks = track_display(artist_name)
-			articles = article_display(artist_name)
-				
-		else:
-			artist_result = model.search_artists("Amy Winehouse")[0]#
-			artist_name = artist_result.name
-			image_url = artist_result.image_url
-			overview = model.get_wiki_page(artist_name)
-			related = related_display(artist_name)
-			tracks = track_display(artist_name)
-			articles = article_display(artist_name)
+		overview = model.get_wiki_page(artist_name)
+		related = related_display(artist_name)
+		tracks = track_display(artist_name)
+		articles = article_display(artist_name)
+			
+	else:
+		artist_result = model.search_artists("Amy Winehouse")[0]#
+		artist_name = artist_result.name
+		image_url = artist_result.image_url
+		overview = model.get_wiki_page(artist_name)
+		related = related_display(artist_name)
+		tracks = track_display(artist_name)
+		articles = article_display(artist_name)
 
 
 
-		return render_template('index.html',artist_name=artist_name,image_url=image_url,related=related,overview=overview,tracks=tracks,articles=articles)
-	except:
-		return render_template('error.html')
+	return render_template('index.html',artist_name=artist_name,image_url=image_url,related=related,overview=overview,tracks=tracks,articles=articles)
+	# except:
+		# return render_template('error.html')
 
 
 
