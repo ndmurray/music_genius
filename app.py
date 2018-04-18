@@ -58,33 +58,33 @@ def staging():
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	# try:
-	if request.method == 'POST':
-		artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
-		artist_result = model.search_artists(artist_input)[0]#First artist in search results
-		artist_name = artist_result.name
-		image_url = artist_result.image_url
+	try:
+		if request.method == 'POST':
+			artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
+			artist_result = model.search_artists(artist_input)[0]#First artist in search results
+			artist_name = artist_result.name
+			image_url = artist_result.image_url
 
 
-		overview = model.get_wiki_page(artist_name)
-		related = related_display(artist_name)
-		tracks = track_display(artist_name)
-		articles = article_display(artist_name)
-			
-	else:
-		artist_result = model.search_artists("Amy Winehouse")[0]#
-		artist_name = artist_result.name
-		image_url = artist_result.image_url
-		overview = model.get_wiki_page(artist_name)
-		related = related_display(artist_name)
-		tracks = track_display(artist_name)
-		articles = article_display(artist_name)
+			overview = model.get_wiki_page(artist_name)
+			related = related_display(artist_name)
+			tracks = track_display(artist_name)
+			articles = article_display(artist_name)
+				
+		else:
+			artist_result = model.search_artists("Amy Winehouse")[0]#
+			artist_name = artist_result.name
+			image_url = artist_result.image_url
+			overview = model.get_wiki_page(artist_name)
+			related = related_display(artist_name)
+			tracks = track_display(artist_name)
+			articles = article_display(artist_name)
 
 
 
-	return render_template('index.html',artist_name=artist_name,image_url=image_url,related=related,overview=overview,tracks=tracks,articles=articles)
-	# except:
-		# return render_template('error.html')
+		return render_template('index.html',artist_name=artist_name,image_url=image_url,related=related,overview=overview,tracks=tracks,articles=articles)
+	except:
+		return render_template('error.html')
 
 
 
