@@ -51,9 +51,6 @@ def related_display(artist):
 
 	pull = cur.execute(statement).fetchall()
 
-	print("THE FETCH")
-	print(pull)
-
 	related_dict = {}
 	for row in pull: 
 		related_dict[row[0]] = row[1]
@@ -121,12 +118,6 @@ def article_display(artist):
 		article_dict[row[0]] = [row[1], row[2], row[3]]
 	return article_dict
 
-
-#Staging lainding page
-
-@app.route('/index2', methods=['GET', 'POST'])
-def staging():
-	return render_template('index2.html',artist=artist,related=related,overview=overview,tracks=tracks,articles=articles)
 
 #Landing Page
 @app.route('/', methods=['GET', 'POST'])

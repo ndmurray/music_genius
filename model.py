@@ -10,9 +10,13 @@ import spotipy.util as util
 #ISSUES
 ##Clear the cache before you run this thing for real, so that Danny Brown's data is in the db
 
-##You need to relate two tables somehow
-
 ##Make sure to turn the 404 page on for 'graceful error handling'
+
+##data in interface must be drawn from db. Data must be written to DB from the cache - 12-20 pts
+
+##Need one more unit test case, and a total of 15 assertions (right now you have 9) - 
+
+##Need a README.md file in your repo, see requirements for what this needs - 
 
 
 #SET UP THE DATABASE
@@ -57,7 +61,7 @@ def stand_up_db_tables():
 	statement = '''
 	CREATE TABLE 'Artists' (
 		'Id' INTEGER PRIMARY KEY AUTOINCREMENT,
-		'Spotify_Id' TEXT NOT NULL,
+		'Spotify_Id' TEXT NOT NULL UNIQUE,
 		'Name' TEXT NOT NULL,
 		'Genre' TEXT NOT NULL,
 		'Popularity' INTEGER NOT NULL,
@@ -81,7 +85,7 @@ def stand_up_db_tables():
 		'Popularity' INTEGER NOT NULL,
 		'Followers' INTEGER NOT NULL,
 		'Image' TEXT NOT NULL,
-		'URL' TEXT NOT NULL,
+		'URL' TEXT NOT NULL UNIQUE,
 		'Searched_Artist_Id' INTEGER 
 
 	)
@@ -100,7 +104,7 @@ def stand_up_db_tables():
 		'Popularity' INTEGER NOT NULL,
 		'Album' TEXT NOT NULL,
 		'Release_Date' TEXT NOT NULL,
-		'URL' TEXT NOT NULL,
+		'URL' TEXT NOT NULL UNIQUE,
 		'Searched_Artist_Id' INTEGER
 
 	)
@@ -117,7 +121,7 @@ def stand_up_db_tables():
 		'Source' TEXT NOT NULL,
 		'Description' TEXT,
 		'PublishedAt' TEXT NOT NULL,
-		'URL' TEXT NOT NULL, 
+		'URL' TEXT NOT NULL UNIQUE, 
 		'Searched_Artist_Id' INTEGER
 
 	)
@@ -134,8 +138,8 @@ def update_artists_table(output): #output is the classed first result of the API
 	cur = conn.cursor()
 	data = output #DB log just first result
 
-	#Load in data from API
-	cur.execute("INSERT INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",data.db_row())
+	#Load in data, only if it doesn't already exist
+	cur.execute("INSERT OR IGNORE INTO Artists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)",data.db_row())
 
 	conn.commit()
 	conn.close()
@@ -146,9 +150,9 @@ def update_related_artists_table(output): #output is a list Artist objects
 	cur = conn.cursor()
 	data = output
 
-	#Load in data from API
+	#Load in data, only if it doesn't already exist
 	for row in data:
-		cur.execute("INSERT INTO RelatedArtists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())	
+		cur.execute("INSERT OR IGNORE INTO RelatedArtists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())	
 
 	#update related artists with searched artist id
 	statement = """
@@ -170,9 +174,9 @@ def update_tracks_table(output):
 	cur = conn.cursor()
 	data = output
 
-	#Load in data from API
+	#Load in data, only if it doesn't already exist
 	for row in data:
-		cur.execute("INSERT INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())
+		cur.execute("INSERT OR IGNORE INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())
 
 
 	statement = """
@@ -194,9 +198,9 @@ def update_articles_table(output):
 	cur = conn.cursor()
 	data = output
 
-	#Load in data from API
+	#Load in data, only if it doesn't already exist
 	for row in data:
-		cur.execute("INSERT INTO Articles VALUES(NULL, ?, ?, ?, ?, ?, NULL)",row.db_row())
+		cur.execute("INSERT OR IGNORE INTO Articles VALUES(NULL, ?, ?, ?, ?, ?, NULL)",row.db_row())
 
 	statement = """
 	UPDATE Articles
@@ -363,6 +367,8 @@ def search_artists(artist="Danny Brown"):
 			else:
 				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			output.append(artist_data)
+
+		update_artists_table(output[0])	#DB log just the first result
 		return output
 	else:
 		#Pull new data and format it
@@ -418,6 +424,8 @@ def get_others_in_genre(artist):
 				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
 			output.append(artist_data)
 
+		#Update DB
+		update_related_artists_table(output) 
 		return output
 
 	else:
@@ -450,7 +458,6 @@ def get_others_in_genre(artist):
 
 		#Update the database
 		update_related_artists_table(output) 
-
 		return output
 
 def get_top_tracks(artist):
@@ -462,13 +469,16 @@ def get_top_tracks(artist):
 	
 	if unique_ident in SP_CACHE_DICT:
 		#Get data from cache
-		print("Getting " + artist + "'s top tracks.")
+		print("Getting " + artist + "'s top tracks from cache.")
 		results = SP_CACHE_DICT[unique_ident]
 		output = []
 		for item in results['tracks']:
 			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
 			output.append(track_data)
 
+
+		#Update the database
+		update_tracks_table(output)
 		return output
 
 	else:
@@ -497,8 +507,6 @@ def get_top_tracks(artist):
 		#Update the database
 		update_tracks_table(output)
 
-		print("TRAKCS OUTPUT")
-
 		return output
 
 
@@ -516,13 +524,15 @@ def get_headlines(artist):
 
 	if unique_ident	in G_CACHE_DICT:
 		#Get data from cache
-		print("Getting headline data for " + artist)
+		print("Getting cached headline data for " + artist)
 		results = G_CACHE_DICT[unique_ident]
 
 		output = []
 		for item in results['articles']:
 			article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
 			output.append(article_data)
+
+		update_articles_table(output)
 		return output
 
 	else:
@@ -555,7 +565,6 @@ def get_headlines(artist):
 		print("Fresh headline data for " + artist + " written to cache.")
 
 		update_articles_table(output) 
-
 		return output
 
 
