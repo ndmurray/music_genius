@@ -159,14 +159,28 @@ def update_artists_table(results):
 	conn.commit()
 	conn.close()
 
-
-def update_related_artists_table(output): #output is a list Artist objects
+#Put data in the Related Artists table if it doesn't already exist, data comes from cache.
+def update_related_artists_table(results): 
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
-	data = output
+
+	output = []
+
+	for item in results['artists']: #first result only
+		if len(item['genres']) < 1 and len(item['images']) < 1:
+			artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+		elif len(item['genres']) < 1:
+			artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+		elif len(item['images']) < 1:
+			artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
+		else:
+			artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
+
+		output.append(artist_data)
+
 
 	#Load in data, only if it doesn't already exist
-	for row in data:
+	for row in output:
 		cur.execute("INSERT OR IGNORE INTO RelatedArtists VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())	
 
 	#update related artists with searched artist id
@@ -184,15 +198,19 @@ def update_related_artists_table(output): #output is a list Artist objects
 	conn.commit()
 	conn.close()
 
-def update_tracks_table(output):
+def update_tracks_table(results):
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
-	data = output
+
+	output = []
+
+	for item in results['tracks']:
+		track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
+		output.append(track_data)
 
 	#Load in data, only if it doesn't already exist
-	for row in data:
+	for row in output:
 		cur.execute("INSERT OR IGNORE INTO Tracks VALUES(NULL, ?, ?, ?, ?, ?, ?, ?, NULL)",row.db_row())
-
 
 	statement = """
 	UPDATE Tracks
@@ -409,22 +427,9 @@ def get_others_in_genre(artist):
 		#Get data from cache
 		print("Getting cached related artist data for " + artist)
 		results = SP_CACHE_DICT[unique_ident]
-		output = []
-
-		for item in results['artists']:
-			if len(item['genres']) < 1 and len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
-			elif len(item['genres']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
-			elif len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
-			else:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
-			output.append(artist_data)
-
+	
 		#Update DB
-		update_related_artists_table(output) 
-		return output
+		update_related_artists_table(results) 
 
 	else:
 		print("Getting fresh related artist data from Spotify for " + artist)
@@ -432,18 +437,6 @@ def get_others_in_genre(artist):
 		artist = search_results[0] #id from first artist in results
 		artist_display =  search_results[1] #name from first artist in results
 		results = SP.artist_related_artists(artist)
-		output = []
-
-		for item in results['artists']: #first result only
-			if len(item['genres']) < 1 and len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
-			elif len(item['genres']) < 1:
-				artist_data = Artist(item['id'],item['name'],"no genre",item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
-			elif len(item['images']) < 1:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],"no image",item['external_urls']['spotify'])
-			else:
-				artist_data = Artist(item['id'],item['name'],item['genres'][0],item['popularity'],item['followers']['total'],item['images'][0]['url'],item['external_urls']['spotify'])
-			output.append(artist_data)
 
 		#Write new spotify data to the cache
 		print("Writing related Spotify data for " + artist_display + " to the cache.")
@@ -455,8 +448,7 @@ def get_others_in_genre(artist):
 		print("Fresh related artist data for " + artist_display + " written to cache.")
 
 		#Update the database
-		update_related_artists_table(output) 
-		return output
+		update_related_artists_table(results) 
 
 def get_top_tracks(artist):
 	base_url = "https://api.spotify.com/v1"
@@ -469,15 +461,9 @@ def get_top_tracks(artist):
 		#Get data from cache
 		print("Getting " + artist + "'s top tracks from cache.")
 		results = SP_CACHE_DICT[unique_ident]
-		output = []
-		for item in results['tracks']:
-			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
-			output.append(track_data)
-
 
 		#Update the database
-		update_tracks_table(output)
-		return output
+		update_tracks_table(results)
 
 	else:
 		print("Getting fresh top tracks for " + artist)
@@ -485,13 +471,6 @@ def get_top_tracks(artist):
 		artist = search_results[0]#id from first artist in results
 		artist_display =  search_results[1]#name from first artist in results
 		results = SP.artist_top_tracks(artist, country="US")
-		output = []
-
-		for item in results['tracks']:
-			track_data = Track(item['id'],item['name'],item['artists'][0]['name'],item['popularity'],item['album']['name'],item['album']['release_date'],item['external_urls']['spotify'])
-			output.append(track_data)
-
-
 
 		# #Write new spotify data to the cache
 		print("Writing top tracks data for " + artist_display + " to the cache.")
@@ -503,11 +482,7 @@ def get_top_tracks(artist):
 		print("Fresh top track data for " + artist_display + " written to cache.")
 
 		#Update the database
-		update_tracks_table(output)
-
-		return output
-
-
+		update_tracks_table(results)
 
 #GOOGLE NEWS 
 

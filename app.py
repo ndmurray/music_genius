@@ -35,17 +35,21 @@ def artist_display(artist):
 		print(e)
 
 	#request data and log it in the DB
-	model.search_artists(artist) 
+	artist_result = model.search_artists(artist) 
+
+	#get id for query matching
+	artist_id = (artist_result[0],)
 
 	#Top five related artists that link to the most recent artist added to the artists table (this table contains all artists the user searched)
 	statement = """
 	SELECT Name, Image
 	FROM Artists
+	WHERE Spotify_Id = ?
 	ORDER BY Id DESC
 	LIMIT 1
 	"""
 
-	pull = cur.execute(statement).fetchall()
+	pull = cur.execute(statement,artist_id).fetchall()
 
 	artist_list = []
 	for row in pull: 
