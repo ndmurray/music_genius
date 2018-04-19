@@ -158,6 +158,7 @@ def update_artists_table(results):
 
 	conn.commit()
 	conn.close()
+	return output # for testing purposes
 
 #Put data in the Related Artists table if it doesn't already exist, data comes from cache.
 def update_related_artists_table(results): 
@@ -200,6 +201,9 @@ def update_related_artists_table(results):
 	conn.commit()
 	conn.close()
 
+	return output # for testing purposes
+
+
 def update_tracks_table(results):
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
@@ -227,6 +231,8 @@ def update_tracks_table(results):
 	cur.execute(statement)
 	conn.commit()
 	conn.close()
+	return output # for testing purposes
+
 
 def update_articles_table(results):
 
@@ -255,6 +261,9 @@ def update_articles_table(results):
 	cur.execute(statement)
 	conn.commit()
 	conn.close()
+
+	return output # for testing purposes
+
 
 
 create_mg_db()
@@ -436,7 +445,7 @@ def get_others_in_genre(artist):
 		results = SP_CACHE_DICT[unique_ident]
 	
 		#Update DB
-		update_related_artists_table(results) 
+		return update_related_artists_table(results) #return for testing purposes
 
 	else:
 		print("Getting fresh related artist data from Spotify for " + artist)
@@ -455,7 +464,7 @@ def get_others_in_genre(artist):
 		print("Fresh related artist data for " + artist_display + " written to cache.")
 
 		#Update the database
-		update_related_artists_table(results) 
+		return update_related_artists_table(results) #return for testing purposes
 
 def get_top_tracks(artist):
 	base_url = "https://api.spotify.com/v1"
@@ -470,7 +479,7 @@ def get_top_tracks(artist):
 		results = SP_CACHE_DICT[unique_ident]
 
 		#Update the database
-		update_tracks_table(results)
+		return update_tracks_table(results) #return for testing purposes
 
 	else:
 		print("Getting fresh top tracks for " + artist)
@@ -489,7 +498,7 @@ def get_top_tracks(artist):
 		print("Fresh top track data for " + artist_display + " written to cache.")
 
 		#Update the database
-		update_tracks_table(results)
+		return update_tracks_table(results) #Return for testing purposes
 
 #GOOGLE NEWS 
 
@@ -507,7 +516,8 @@ def get_headlines(artist):
 		print("Getting cached headline data for " + artist)
 		results = G_CACHE_DICT[unique_ident]
 
-		update_articles_table(results)
+		#Update the DB
+		return update_articles_table(results) #return for testing purposes
 
 	else:
 		print("Getting fresh headline data for " + artist)
@@ -531,10 +541,11 @@ def get_headlines(artist):
 		g_cache_file.close()
 		print("Fresh headline data for " + artist + " written to cache.")
 
-		update_articles_table(results) 
+		#Update the DB 
+		return update_articles_table(results) #return for testing purposes
 
 
-# get_others_in_genre('Coleman Hawkins')
+# print(get_others_in_genre('Coleman Hawkins'))
 # search_artists('Coleman Hawkins')
 # get_top_tracks('Coleman Hawkins')
 # get_headlines('Coleman Hawkins')

@@ -1,5 +1,6 @@
 import unittest
 import model as model
+import app as app
 import sqlite3
 
 DBNAME = model.DBNAME
@@ -42,11 +43,9 @@ class TestCalls(unittest.TestCase):
 
 	def testArtistSearch(self):
 		#successful artist name
-		self.assertEqual(TestCalls.search1[0].name, "Amy Winehouse")
+		self.assertEqual(TestCalls.search1[1], "Amy Winehouse")
 		#successful artist id
-		self.assertEqual(TestCalls.search1[0].spotify_id,"6Q192DXotxtaysaqNPy5yR")
-		#successful genre
-		self.assertEqual(TestCalls.search2[0].genre,"alternative hip hop")
+		self.assertEqual(TestCalls.search1[0],"6Q192DXotxtaysaqNPy5yR")
 
 	def testRelated(self):
 		#successful related artist count
@@ -66,11 +65,11 @@ class TestCalls(unittest.TestCase):
 		#successful results
 		self.assertEqual(len(TestCalls.search5),20)
 		#successful source
-		self.assertEqual(TestCalls.search5[0].source,"Deviantart.com")
+		self.assertEqual(TestCalls.search5[0].source,"The New York Times")
 		#successful description
-		self.assertEqual(TestCalls.search5[1].description,"Danny Brown, a rapper from Detroit who has released multiple albums and mixtapes. a music video directed by Jonah Hill, joins Joey Diaz and Lee Syatt live in studio. This podcast is brought to you by: eharmony - Enter code CHURCH at checkout for a free month …")
+		self.assertEqual(TestCalls.search5[1].description,"Here’s what you need to know to start your day.")
 		#successful title
-		self.assertEqual(TestCalls.search5[4].title,"Atrocity Confrontation")
+		self.assertEqual(TestCalls.search5[4].title,"Six Nations: James Haskell & Joe Marler in England squad v Scotland")
 
 	def testOverview(self):
 		#successful results
@@ -83,6 +82,7 @@ class TestCalls(unittest.TestCase):
 #     Test Successful Data Storage
 
 #These calls test that data was properly stored in the database
+########################################################
 
 class TestStorage(unittest.TestCase):
 
@@ -134,10 +134,23 @@ class TestStorage(unittest.TestCase):
 		result = cur.execute(statement).fetchone()
 		print(result)
 
-		self.assertEqual(str(result[0]),"Danny Brown")
+		self.assertEqual(str(result[0]),"Review: In ‘Balls,’ Billie Jean and Bobby Come Out Swinging")
 
 		conn.close()
 
+########################################################
+#     Test Controller
+
+#These calls test controller passes right data to the view
+########################################################
+
+
+class TestController(unittest.TestCase):
+
+	def testArtist(self):
+		test = app.artist_display('Amy Winehouse')
+		self.assertEqual(test[0],'Amy Winehouse')
+		self.assertEqual(test[1],'https://i.scdn.co/image/316a6ef4535c377bdfaea61c99177de9d19661b4')
 
 clear_cache()
 
