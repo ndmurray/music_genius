@@ -226,13 +226,18 @@ def update_tracks_table(results):
 	conn.commit()
 	conn.close()
 
-def update_articles_table(output):
+def update_articles_table(results):
+
 	conn = sqlite3.connect(DBNAME)
 	cur = conn.cursor()
-	data = output
+
+	output = []
+	for item in results['articles']:
+		article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
+		output.append(article_data)
 
 	#Load in data, only if it doesn't already exist
-	for row in data:
+	for row in output:
 		cur.execute("INSERT OR IGNORE INTO Articles VALUES(NULL, ?, ?, ?, ?, ?, NULL)",row.db_row())
 
 	statement = """
@@ -500,13 +505,7 @@ def get_headlines(artist):
 		print("Getting cached headline data for " + artist)
 		results = G_CACHE_DICT[unique_ident]
 
-		output = []
-		for item in results['articles']:
-			article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
-			output.append(article_data)
-
-		update_articles_table(output)
-		return output
+		update_articles_table(results)
 
 	else:
 		print("Getting fresh headline data for " + artist)
@@ -520,13 +519,6 @@ def get_headlines(artist):
 		}
 
 		results = json.loads(requests.get(base_url, params_dict).text)
-		print(type(results))
-
-		output = []
-		for item in results['articles']:
-			article_data = Article(item['title'],item['source']['name'],item['description'],item['publishedAt'][:10],item['url'])
-			output.append(article_data)
-
 
 		#Write new data to cache
 		print("Writing headline data for " + artist + " to cache.")
@@ -537,8 +529,7 @@ def get_headlines(artist):
 		g_cache_file.close()
 		print("Fresh headline data for " + artist + " written to cache.")
 
-		update_articles_table(output) 
-		return output
+		update_articles_table(results) 
 
 
 # get_others_in_genre('Coleman Hawkins')

@@ -80,7 +80,7 @@ def related_display(artist):
 	FROM RelatedArtists as r
 	JOIN Artists AS a
 		ON r.Searched_Artist_Id = a.Id
-	ORDER BY r.Searched_Artist_Id DESC
+	ORDER BY r.Popularity DESC
 	LIMIT 5
 	"""
 
