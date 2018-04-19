@@ -26,6 +26,37 @@ clear_cache()
 #Pull DB data for use on the web page
 
 #Arists 
+def artist_display(artist): 
+
+	try:
+		conn = sqlite3.connect(DBNAME)
+		cur = conn.cursor()
+	except Error as e:
+		print(e)
+
+	#request data and log it in the DB
+	model.search_artists(artist) 
+
+	#Top five related artists that link to the most recent artist added to the artists table (this table contains all artists the user searched)
+	statement = """
+	SELECT Name, Image
+	FROM Artists
+	ORDER BY Id DESC
+	LIMIT 1
+	"""
+
+	pull = cur.execute(statement).fetchall()
+
+	artist_list = []
+	for row in pull: 
+		artist_list.append(row[0])
+		artist_list.append(row[1])
+	return artist_list
+
+	conn.close()
+
+
+#Related Artists
 
 #returns dictionary of artist name : URL
 def related_display(artist): 
@@ -125,9 +156,9 @@ def index():
 	# try:
 	if request.method == 'POST':
 		artist_input = request.form['artist-entry'] #name attribute of the form in the view, gets the term the user searched on.
-		artist_result = model.search_artists(artist_input)[0]#First artist in search results
-		artist_name = artist_result.name
-		image_url = artist_result.image_url
+		artist_result = artist_display(artist_input)#First artist in search results
+		artist_name = artist_result[0]
+		image_url = artist_result[1]
 
 
 		overview = model.get_wiki_page(artist_name)
@@ -136,9 +167,9 @@ def index():
 		articles = article_display(artist_name)
 			
 	else:
-		artist_result = model.search_artists("Amy Winehouse")[0]#
-		artist_name = artist_result.name
-		image_url = artist_result.image_url
+		artist_result = artist_display("Amy Winehouse")
+		artist_name = artist_result[0]
+		image_url = artist_result[1]
 		overview = model.get_wiki_page(artist_name)
 		related = related_display(artist_name)
 		tracks = track_display(artist_name)
