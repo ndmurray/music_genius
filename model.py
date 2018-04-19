@@ -187,8 +187,10 @@ def update_related_artists_table(results):
 	statement = """
 	UPDATE RelatedArtists
 	SET Searched_Artist_Id = (
-		SELECT MAX(Id) --The ID of the last artist added to the databse, because the search artist and related artist functions run in sequence, this will always be the right artist
+		SELECT Id --The ID of the last artist added to the databse, because the search artist and related artist functions run in sequence, this will always be the right artist
 		FROM Artists
+		ORDER BY ID DESC
+		LIMIT 1
 	) 
 	WHERE Searched_Artist_Id IS NULL
 

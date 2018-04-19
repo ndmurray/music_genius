@@ -71,8 +71,15 @@ def related_display(artist):
 	except Error as e:
 		print(e)
 
-	#request data and log it in the DB
-	model.get_others_in_genre(artist) 
+
+	#request data and log it in the DB, if it doesn't already exist
+	artist_result = model.search_artists(artist) 
+
+	#get name for query matching
+	artist_name = artist_result[1]
+	artist_name_query = (artist_result[1],)
+
+	model.get_others_in_genre(artist_name) 
 
 	#Top five related artists that link to the most recent artist added to the artists table (this table contains all artists the user searched)
 	statement = """
@@ -80,11 +87,11 @@ def related_display(artist):
 	FROM RelatedArtists as r
 	JOIN Artists AS a
 		ON r.Searched_Artist_Id = a.Id
-	ORDER BY r.Popularity DESC
+	WHERE a.Name = ?
 	LIMIT 5
 	"""
 
-	pull = cur.execute(statement).fetchall()
+	pull = cur.execute(statement,artist_name_query).fetchall()
 
 	related_dict = {}
 	for row in pull: 
@@ -102,6 +109,11 @@ def track_display(artist):
 	except Error as e:
 		print(e)
 
+	#get name for query matching
+	artist_result = model.search_artists(artist)
+	artist_name = artist_result[1]
+	artist_name_query = (artist_result[1],)
+
 	#Make the reuest and log to db
 	model.get_top_tracks(artist)
 
@@ -111,11 +123,11 @@ def track_display(artist):
 	FROM Tracks as t
 	JOIN Artists AS a
 		ON t.Searched_Artist_Id = a.Id
-	ORDER BY t.Searched_Artist_Id DESC
+	WHERE a.Name = ?
 	LIMIT 5
 	"""
 
-	pull = cur.execute(statement).fetchall()
+	pull = cur.execute(statement, artist_name_query).fetchall()
 
 	track_dict = {}
 	for row in pull: #Only top 5
@@ -133,6 +145,12 @@ def article_display(artist):
 	except Error as e:
 		print(e)
 
+
+	#get name for query matching
+	artist_result = model.search_artists(artist)
+	artist_name = artist_result[1]
+	artist_name_query = (artist_result[1],)
+
 	#Make the request and log it to the DB
 	model.get_headlines(artist)
 
@@ -142,11 +160,11 @@ def article_display(artist):
 	FROM Articles as h
 	JOIN Artists AS a
 		ON h.Searched_Artist_Id = a.Id
-	ORDER BY h.Searched_Artist_Id DESC
+	WHERE a.Name = ?
 	LIMIT 5
 	"""
 
-	pull = cur.execute(statement).fetchall()
+	pull = cur.execute(statement, artist_name_query).fetchall()
 
 	article_dict = {}
 	for row in pull:#Only top 5
